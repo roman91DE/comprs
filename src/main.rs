@@ -30,14 +30,14 @@ fn build_mapping(freq: HashMap<char, usize>) -> Result<HashMap<char, u8>, String
     Ok(result)
 }
 
-fn encode(input: &str, mapping: &HashMap<char, u8>) -> Result<Vec<u8>, String> {
+fn encode(input: &str, mapping: &HashMap<char, u8>) -> Vec<u8> {
     let mut result: Vec<u8> = input
         .chars()
         .map(|c| mapping.get(&c).copied().expect("Something went wrong..."))
         .collect();
-    
+
     result.shrink_to_fit();
-    Ok(result)
+    result
 }
 
 fn decompress(data: &[u8], reverse_map: &HashMap<u8, char>) -> Result<String, String> {
@@ -45,22 +45,21 @@ fn decompress(data: &[u8], reverse_map: &HashMap<u8, char>) -> Result<String, St
     for byte in data {
         match reverse_map.get(byte) {
             Some(&ch) => result.push(ch),
-            None => return Err(format!("Invalid byte: {}", byte)),
+            None => return Err(format!("Invalid byte: {byte}")),
         }
     }
     Ok(result)
 }
 
 fn main() -> Result<(), String> {
-    let s = r#"
+    let s = r"
 😀😁😂🤣😃😄😅😆😉😊😋😎😍😘🥰😗😙😚🙂🤗🤩🤔🤨😐😑😶🙄😏
 🥲🫠🫢🫣🤐🫡🫥🤑😲☹️🙁😖😣😞😓😩😫😢😭😤😠😡🤬🤯😳🥵🥶😶‍🌫️
 😀😁😂🤣😃😄😅😆😉😊😋😎😍😘🥰😗😙😚🙂🤗🤩🤔🤨😐😑😶🙄😏
 🥲🫠🫢🫣🤐🫡🫥🤑😲☹️🙁😖😣😞😓😩😫😢😭😤😠😡🤬🤯😳🥵🥶😶‍🌫️
 😀😁😂🤣😃😄😅😆😉😊😋😎😍😘🥰😗😙😚🙂🤗🤩🤔🤨😐😑😶🙄😏
 🥲🫠🫢🫣🤐🫡🫥🤑😲☹️🙁😖😣😞😓😩😫😢😭😤😠😡🤬🤯😳🥵🥶😶‍🌫️
-"#;
-
+";
 
     println!("Input: {s:?}");
     let stack_input = std::mem::size_of_val(&s);
@@ -72,8 +71,7 @@ fn main() -> Result<(), String> {
     let mapping = build_mapping(freqs)?;
     println!("Mapping: {mapping:?}");
 
-
-    let encoded = encode(s, &mapping)?;
+    let encoded = encode(s, &mapping);
     let stack_output = std::mem::size_of_val(&encoded);
     let heap_output = encoded.len();
     println!("Encoded: {encoded:?}");
@@ -86,8 +84,6 @@ fn main() -> Result<(), String> {
     println!("Stack Memory Output: {stack_output}");
     println!("Heap Memory Input (UTF-8 bytes): {heap_input}");
     println!("Heap Memory Output (compressed bytes): {heap_output}");
-
-
 
     Ok(())
 }
